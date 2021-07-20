@@ -15,19 +15,34 @@ function App() {
     };
     const [movies, setMovies] = useState("");
     const [movieInfo, setMovieInfo] = useState(defaultMovieInfo);
-    const [page, setPage] = useState(0)
+    const [page, setPage] = useState({
+        movieName: '',
+        currentPage: 0,
+        maxPageCount: 0
+    })
 
 
-    const onMovieSearch = (movieName) => {
+    const onMovieSearch = (movieName, pg = 1) => {
         setMovieInfo(defaultMovieInfo);
-        fetch(`https://www.omdbapi.com/?s=${movieName}&apikey=70d1e4a`).then((response) => {
+        fetchMovies(movieName, pg);
+    }
+
+    function fetchMovies(movieName, pg) {
+        fetch(`https://www.omdbapi.com/?s=${movieName}&page=${pg}&apikey=70d1e4a`).then((response) => {
             return response.json();
-        }).then((movies) => {
-            console.log("movies", movies);
-            if (movies.Response === "False") {
+        }).then((Movies) => {
+            console.log("movies", Movies);
+            if (Movies.Response === "False") {
                 setMovies([]);
             } else {
-                setMovies(movies['Search']);
+                let { Search, totalResults } = Movies;
+                totalResults = +totalResults;
+                setMovies(Search);
+                setPage({
+                    currentPage: pg,
+                    maxPageCount: Math.ceil(totalResults / 10),
+                    movieName
+                })
             }
         }).catch((e) => {
             setMovies([]);
@@ -42,12 +57,17 @@ function App() {
         })
     }
 
+    const onPaginationClick = (pageclicked) => {
+        let { movieName, currentPage } = page;
+        fetchMovies(movieName, pageclicked == "next" ? currentPage + 1 : currentPage - 1)
+    }
+
     return (
         <div className="container">
             <Header onMovieSearch={onMovieSearch} />
             <MovieInfo movieInfo={movieInfo} />
             <MovieContainer movies={movies} onMovieClick={onMovieClick} />
-            <Pagination />
+            <Pagination {...page} onPaginationClick={onPaginationClick} />
         </div>
     )
 }

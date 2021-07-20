@@ -28,7 +28,13 @@ const MovieInfo = (props) => {
                 <p><strong>Director(s) :</strong> {Director} </p>
                 <p><strong>Actors(s) :</strong> {Actors}</p>
                 <p><strong>Story :</strong> {Plot}</p>
-                {Ratings.length > 0 ? <Rating Ratings={Ratings} /> : ""}
+                {
+                    Ratings.map((rating)=>{
+                        const { Source, Value } = rating;
+                        return <div key={`${Source}_${Value}`}><strong>{Source}</strong> : {Value}</div>
+                    })
+                }
+                {/* {Ratings.length > 0 ? <Rating Ratings={Ratings} /> : ""} */}
             </div>
         </div>
     )
